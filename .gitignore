@@ -7,6 +7,7 @@ cred.json
 *.so
 folder_id.txt
 myenv/
+.env
 # Distribution / packaging
 .Python
 build/
