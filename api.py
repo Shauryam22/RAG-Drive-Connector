@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from pipeline import run_sync_pipeline 
+from main import run_sync_pipeline 
 from vector import DocStore        # vector  
 from llm import generate_rag_answer   #llm
 
