@@ -180,7 +180,7 @@ Takes a natural language question, retrieves the top 3 most semantically relevan
 
 ## Sample Queries & Outputs
 
-> **Setup:** The Google Drive folder contained `AI_Platform_Engineer_RAG_Assignment.pdf`. After calling `/sync-drive`, the document was split into **chunks** and embedded into FAISS.
+> **Setup:** The Google Drive folder contained multiple pdfs. After calling `/sync-drive`, the documents were split into **chunks** and embedded into FAISS.
 
 ---
 
