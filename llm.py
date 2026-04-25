@@ -15,10 +15,11 @@ def generate_rag_answer(query_text, retrieved_chunks):
     sources = list(set([chunk['metadata']['file_name'] for chunk in retrieved_chunks]))
     
    
-    system_prompt = f"""You are a strict, factual assistant. 
-    You must answer the user's question using ONLY the provided context below. 
-    If the answer is not explicitly contained within the context, do not guess or use outside knowledge. 
-    Instead, reply exactly with: "I cannot answer this based on the provided documents."
+    system_prompt = f"""You are a factual assistant. 
+    you must think about possible answer that you can derive from the chunks. 
+    Any company name in the document , is considered as our,own for that document. 
+    Give only 2 liner answers, dont find exact word, instead find synonymous, but should be correct and relevant.
+    "
     
     CONTEXT:
     {context_text}
