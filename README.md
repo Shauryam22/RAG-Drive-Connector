@@ -192,9 +192,7 @@ POST /ask
 ```
 ```json
 {
-  "answer": "The expected architecture for the assignment involves
-   connecting various components to process and answer questions from documents. 
-   It includes connectors to Google Drive, processing for parsing and chunking, embedding, search, and API layers.",
+  "answer": "The expected architecture for the assignment involves connecting various components to process and answer questions from documents. It includes connectors to Google Drive, processing for parsing and chunking, embedding, search, and API layers.",
   "sources": [
     "Complaints-Policy-and-Procedure.pdf",
     "AI_Platform_Engineer_RAG_Assignment.pdf"
