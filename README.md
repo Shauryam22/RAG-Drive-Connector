@@ -1,4 +1,5 @@
 # RAG-DRIVE-CONNECTOR-PIPELINE
+<!-- RESUME: ADD -->
 
 ## Overview
 This repository contains a fully automated RAG pipeline designed to sync documents directly from Google Drive, process them into a local vector knowledge base, and serve highly accurate, grounded answers using Meta's Llama-3.1 model. The application is served via a RESTful API built with FastAPI and is structured for production-ready containerized deployment.
