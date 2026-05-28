@@ -4,7 +4,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 
-
+# DOC LOADER and CHUNKING
 def process_doc(path_file,file_id,file_name):
     """Extracts the text from a doc, then chunk it.
     """
@@ -57,6 +57,6 @@ if __name__=='__main__':
         )
         
         if results:
-            print(f"{results[0]['chunk_text'][:200]}")
+            print(f"{type(results)}")
         
         

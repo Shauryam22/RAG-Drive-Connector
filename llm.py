@@ -1,63 +1,78 @@
-import os
-from groq import Groq
 from dotenv import load_dotenv
 
+# GENERATION PHASE
 
 load_dotenv()
-client = Groq(api_key=os.getenv('GROQ_API_KEY'))
+from langchain_core.prompts import PromptTemplate,ChatPromptTemplate
+from langchain_core.runnables import RunnableParallel,RunnableLambda,RunnablePassthrough
+from langchain_groq import ChatGroq
+from langchain_core.output_parsers import StrOutputParser
+from langchain_huggingface import ChatHuggingFace,HuggingFaceEndpoint
 
-def generate_rag_answer(query_text, retrieved_chunks):
-  
-    context_text = "\n\n---\n\n".join([chunk['chunk_text'] for chunk in retrieved_chunks])
-    
-    # Extracting the unique file names for our 'sources' list
-    # We use a set() so if multiple chunks came from the same PDF, it only lists it once
-    sources = list(set([chunk['metadata']['file_name'] for chunk in retrieved_chunks]))
-    
-   
-    system_prompt = f"""You are a factual assistant. 
-    you must think about possible answer that you can derive from the chunks. 
-    Any company name in the document , is considered as our,own for that document. 
-    Give only 2 liner answers, dont find exact word, instead find synonymous, but should be correct and relevant.
-    "
-    
-    CONTEXT:
-    {context_text}
-    """
-    
-    print("Sending context to LLM...")
-    
-    # 4. Generate the answer using the free Llama-3 model
-    response = client.chat.completions.create(
-        model="llama-3.1-8b-instant", 
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": query_text}
-        ],
-        temperature=0.0 # Setting temperature to 0 removes creative hallucination
+def format_docs(retrieved_docs):
+    context_text = '\n\n'.join([doc.page_content for doc in retrieved_docs])
+    return context_text
+
+def generate_rag_answer(query,retriever):
+    # model = HuggingFaceEndpoint(
+    #         repo_id="Qwen/Qwen2.5-72B-Instruct", 
+    #         task='text-generation',
+    #         max_new_tokens=256,
+    #         temperature=0) # type: ignore
+    # llm = ChatHuggingFace(llm=model)
+    llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.0)
+    # prompt = PromptTemplate(
+    #     template="""You are a factual assistant. 
+    #                 you must think about possible answer that you can derive from the chunks. 
+    #                 Any company name in the document , is considered as our,own for that document. 
+    #                 Give only 2 liner answers, dont find exact word, instead find synonymous, but should be correct and relevant.
+    #                 {context}
+    #                 question: {question}""",
+    #     input_variables=['context','question']
+
+    # )
+    prompt = ChatPromptTemplate.from_messages([
+        ("system","""You are a factual assistant. 
+                    you must think about possible answer that you can derive from the chunks. 
+                    Any company name in the document , is considered as our,own for that document. 
+                    Give only 2 liner answers, dont find exact word, instead find synonymous, but should be correct and relevant.
+                    {context}"""),
+        ("human","""question: {question}"""),
+    ]
     )
     
-    answer_text = response.choices[0].message.content
-    
-    return {
-        "answer": answer_text,
-        "sources": sources
-    }
-
-
-if __name__ == '__main__':
-    # Simulating FAISS search() function o/p
-    mock_retrieved_chunks = [
+    # when we invoke parallel_chain, both context and question will get the input query, context will apply retriever and formatting , and question just takes input as it is.
+    # parallel_chain = RunnableParallel(
+    #     {
+    #         'context':retriever|RunnableLambda(format_docs),   
+    #         'question': RunnablePassthrough()
+    #     }
+    # )
+    parallel_chain = RunnableParallel(
         {
-            "chunk_text": "The trial assignment duration is 48-72 hours. Deliverables include a GitHub repo and a README.",
-            "metadata": {"file_name": "AI_Platform_Engineer_RAG_Assignment.pdf", "doc_id": "123", "source": "gdrive"}
+            'docs':retriever,   
+            'question': RunnablePassthrough()
         }
-    ]
+    )
+    parser = StrOutputParser()
+    # main_chain = parallel_chain|prompt|llm|parser
+    main_chain = parallel_chain | {
+        
+        # Path A: Generate the Answer
+        "answer": (
+            RunnableLambda(lambda x: {"context": format_docs(x["docs"]), "question": x["question"]}) 
+            | prompt 
+            | llm 
+            | parser
+        ),
+        
+        # Path B: Extract the Sources
+        "sources": RunnableLambda(lambda x: list(set([doc.metadata.get('file_name', 'Unknown') for doc in x["docs"]])))
+    }
     
-    test_query = "What are the deliverables for this assignment?"
+    return main_chain.invoke(query)
     
-    final_output = generate_rag_answer(test_query, mock_retrieved_chunks)
     
-    print("\n--- FINAL RAG RESPONSE ---")
-    import json
-    print(json.dumps(final_output, indent=2))
+    
+    
+    

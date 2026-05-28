@@ -36,4 +36,7 @@ def run_sync_pipeline():
     print(
         f"\nPipeline Complete! Successfully processed into {len(all_processed_chunks)} total chunks."
     )
+    #print(all_processed_chunks)
     return all_processed_chunks
+
+# print(run_sync_pipeline)
