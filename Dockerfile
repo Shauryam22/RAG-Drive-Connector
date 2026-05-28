@@ -1,0 +1,19 @@
+FROM python:3.10-slim
+
+# to prevent python to print stdout
+ENV PYTHONBUFFERED=1 
+
+WORKDIR /app
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+RUN python -c "from fastembed.embedding import DefaultEmbedding; DefaultEmbedding('BAAI/bge-small-en-v1.5')"
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["uvicorn","api:app","--host","0.0.0.0","--port","8000"]
+
