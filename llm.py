@@ -14,23 +14,8 @@ def format_docs(retrieved_docs):
     return context_text
 
 def generate_rag_answer(query,retriever):
-    # model = HuggingFaceEndpoint(
-    #         repo_id="Qwen/Qwen2.5-72B-Instruct", 
-    #         task='text-generation',
-    #         max_new_tokens=256,
-    #         temperature=0) # type: ignore
-    # llm = ChatHuggingFace(llm=model)
+   
     llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0.0)
-    # prompt = PromptTemplate(
-    #     template="""You are a factual assistant. 
-    #                 you must think about possible answer that you can derive from the chunks. 
-    #                 Any company name in the document , is considered as our,own for that document. 
-    #                 Give only 2 liner answers, dont find exact word, instead find synonymous, but should be correct and relevant.
-    #                 {context}
-    #                 question: {question}""",
-    #     input_variables=['context','question']
-
-    # )
     prompt = ChatPromptTemplate.from_messages([
         ("system","""You are a factual assistant. 
                     you must think about possible answer that you can derive from the chunks. 
