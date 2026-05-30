@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # to prevent python to print stdout
 ENV PYTHONBUFFERED=1 

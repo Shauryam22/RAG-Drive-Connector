@@ -1,6 +1,6 @@
 # Security
 .env
-credentials.json
+cred.json
 token.json
 
 # Python Cache
